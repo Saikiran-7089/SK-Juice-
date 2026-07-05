@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --premium-white: #f5f5f7;
+    --premium-black: #1d1d1f;
+  }
+
+  body {
+    @apply bg-white text-black overflow-x-hidden m-0 p-0 font-sans antialiased relative;
+  }
+
+  #root {
+    @apply min-h-screen w-full p-0 m-0 border-none;
+  }
+}
+
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .text-shadow-premium {
+    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .drop-shadow-juice {
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar for Premium Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Lenis Recommended Styles */
+html, html.lenis, html.lenis body {
+  height: auto;
+  position: relative !important;
+  scroll-behavior: smooth !important;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.navbar {
+  z-index: 1000 !important;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 140px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.cart-footer {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 20;
+  border-top: 1px solid #e5e7eb;
+  padding: 20px;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+@media (max-height: 800px) {
+  .cart-drawer-compact .p-6,
+  .cart-drawer-compact .p-5 {
+    padding: 14px !important;
+  }
+  .cart-drawer-compact .gap-6,
+  .cart-drawer-compact .gap-5 {
+    gap: 12px !important;
+  }
+  .cart-drawer-compact img.w-20 {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  .cart-drawer-compact .py-4,
+  .cart-drawer-compact .h-\[56px\] {
+    height: 48px !important;
+  }
+  .cart-drawer-compact .pb-28 {
+    padding-bottom: 72px !important;
+  }
+}
