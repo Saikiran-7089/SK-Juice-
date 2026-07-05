@@ -27,10 +27,7 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
     customerName: '',
     customerPhone: '',
     customerAddress: '',
-    transactionId: '',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: ''
+    transactionId: ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,13 +56,8 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
 
     try {
       // Validate payment specific fields
-      if (paymentMethod === 'UPI' && formData.transactionId.length !== 12) {
+      if (formData.transactionId.length !== 12) {
         setErrorMsg('UPI Transaction ID must be exactly 12 digits.');
-        setIsSubmitting(false);
-        return;
-      }
-      if (paymentMethod === 'Card' && formData.cardNumber.length < 16) {
-        setErrorMsg('Please enter a valid credit/debit card number.');
         setIsSubmitting(false);
         return;
       }
@@ -82,12 +74,8 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
         message += `- ${item.name} (${item.type}) x ${item.quantity} = ₹${item.price * item.quantity}\n`;
       });
       
-      message += `\n*Payment Method:* ${paymentMethod}\n`;
-      if (paymentMethod === 'UPI') {
-        message += `*UPI Transaction ID (UTR):* ${formData.transactionId}\n`;
-      } else if (paymentMethod === 'Card') {
-        message += `*Card Ending in:* ${formData.cardNumber.slice(-4)}\n`;
-      }
+      message += `\n*Payment Method:* UPI\n`;
+      message += `*UPI Transaction ID (UTR):* ${formData.transactionId}\n`;
       
       message += `\n*Total Amount:* ₹${calculateTotal()}\n`;
 
@@ -105,10 +93,7 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
         customerName: '', 
         customerPhone: '', 
         customerAddress: '', 
-        transactionId: '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCvv: ''
+        transactionId: ''
       });
       
     } catch (error) {
@@ -330,117 +315,36 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
 
                 {/* Payment Method Selector */}
                 <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3.5">Payment Method</h4>
-                  <div className="grid grid-cols-3 gap-2 p-1 bg-gray-50 rounded-2xl border border-gray-100 mb-4">
-                    {[
-                      { id: 'UPI', label: 'UPI', icon: QrCode },
-                      { id: 'Cash', label: 'Cash', icon: Banknote },
-                      { id: 'Card', label: 'Card', icon: CreditCard }
-                    ].map(method => {
-                      const Icon = method.icon;
-                      const isSelected = paymentMethod === method.id;
-                      return (
-                        <button
-                          key={method.id}
-                          type="button"
-                          onClick={() => setPaymentMethod(method.id)}
-                          className={`py-2 rounded-xl text-xs font-black uppercase flex flex-col items-center gap-1.5 transition-all ${
-                            isSelected 
-                              ? 'bg-[#6db33f] text-white shadow-sm' 
-                              : 'text-gray-500 hover:text-black hover:bg-gray-100/50'
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                          <span>{method.label}</span>
-                        </button>
-                      );
-                    })}
+                  <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3.5">Payment Method: UPI</h4>
+                  
+                  <div className="flex flex-col items-center text-center animate-slide-up">
+                    <div className="border-4 border-[#6db33f]/10 rounded-2xl p-2 bg-white mb-3 shadow-inner">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=8688915833@slc&pn=SK%20Juice%20Center&am=${totalAmount}&cu=INR`} 
+                        alt="Payment QR Code" 
+                        className="w-32 h-32 object-contain"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 font-bold mb-4 max-w-[280px]">
+                      Scan via GPay, PhonePe, Paytm or any UPI app to transfer <span className="text-[#6db33f] font-black text-sm block mt-0.5">₹{totalAmount}</span>
+                    </p>
+                    <div className="w-full flex flex-col gap-1.5 text-left">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">
+                        12-Digit Transaction UTR ID
+                      </label>
+                      <input 
+                        type="text" 
+                        name="transactionId" 
+                        required
+                        minLength="12"
+                        maxLength="12"
+                        value={formData.transactionId}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 123456789012" 
+                        className="w-full p-3.5 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-[#6db33f] focus:ring-2 focus:ring-[#6db33f]/10 transition-all font-mono font-bold tracking-wider text-gray-800 text-center uppercase"
+                      />
+                    </div>
                   </div>
-
-                  {/* Payment Info / Sub-sections */}
-                  {paymentMethod === 'Cash' && (
-                    <div className="p-4 bg-green-50/50 border border-green-100 rounded-2xl text-xs font-semibold text-gray-600 flex items-center gap-2.5 animate-slide-up">
-                      <Banknote className="w-5 h-5 text-[#6db33f] flex-shrink-0" />
-                      <span>Cash on Delivery selected. You will pay cash to our delivery executive when your fresh juices arrive!</span>
-                    </div>
-                  )}
-
-                  {paymentMethod === 'UPI' && (
-                    <div className="flex flex-col items-center text-center animate-slide-up">
-                      <div className="border-4 border-[#6db33f]/10 rounded-2xl p-2 bg-white mb-3 shadow-inner">
-                        <img 
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=8688915833@slc&pn=SK%20Juice%20Center&am=${totalAmount}&cu=INR`} 
-                          alt="Payment QR Code" 
-                          className="w-32 h-32 object-contain"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 font-bold mb-4 max-w-[280px]">
-                        Scan via GPay, PhonePe, Paytm or any UPI app to transfer <span className="text-[#6db33f] font-black text-sm block mt-0.5">₹{totalAmount}</span>
-                      </p>
-                      <div className="w-full flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">
-                          12-Digit Transaction UTR ID
-                        </label>
-                        <input 
-                          type="text" 
-                          name="transactionId" 
-                          required={paymentMethod === 'UPI'}
-                          minLength="12"
-                          maxLength="12"
-                          value={formData.transactionId}
-                          onChange={handleInputChange}
-                          placeholder="e.g. 123456789012" 
-                          className="w-full p-3.5 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-[#6db33f] focus:ring-2 focus:ring-[#6db33f]/10 transition-all font-mono font-bold tracking-wider text-gray-800 text-center uppercase"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {paymentMethod === 'Card' && (
-                    <div className="flex flex-col gap-3.5 animate-slide-up">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Card Number</label>
-                        <input 
-                          type="text" 
-                          name="cardNumber" 
-                          required={paymentMethod === 'Card'}
-                          maxLength="16"
-                          value={formData.cardNumber}
-                          onChange={handleInputChange}
-                          placeholder="1234 5678 9012 3456" 
-                          className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-[#6db33f] focus:ring-2 focus:ring-[#6db33f]/10 transition-all font-mono text-gray-800 text-center"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Expiry Date</label>
-                          <input 
-                            type="text" 
-                            name="cardExpiry" 
-                            required={paymentMethod === 'Card'}
-                            placeholder="MM/YY" 
-                            maxLength="5"
-                            value={formData.cardExpiry}
-                            onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-[#6db33f] focus:ring-2 focus:ring-[#6db33f]/10 transition-all text-center"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">CVV</label>
-                          <input 
-                            type="password" 
-                            name="cardCvv" 
-                            required={paymentMethod === 'Card'}
-                            placeholder="***" 
-                            maxLength="3"
-                            value={formData.cardCvv}
-                            onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-[#6db33f] focus:ring-2 focus:ring-[#6db33f]/10 transition-all text-center"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </form>
 
