@@ -1,10 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, ShoppingBag, MapPin, User, Phone, CheckCircle, QrCode, CreditCard, Banknote } from 'lucide-react';
+import { useLenis } from 'lenis/react';
 
 const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart }) => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // UPI, Cash, Card
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    }
+    return () => {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    };
+  }, [isOpen, lenis]);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -126,7 +142,7 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
 
       {/* Cart Drawer */}
       <div 
-        className={`fixed bottom-0 right-0 h-[100vh] w-full max-w-[450px] bg-white z-[1001] shadow-2xl flex flex-col transition-all duration-500 ease-[cubic-bezier(0.25, 0.8, 0.25, 1)] rounded-t-[2.5rem] md:rounded-t-none md:rounded-l-[2.5rem] cart-drawer-compact ${
+        className={`fixed top-0 bottom-0 right-0 h-[100vh] w-full max-w-[450px] bg-white z-[1001] shadow-2xl flex flex-col transition-all duration-500 ease-[cubic-bezier(0.25, 0.8, 0.25, 1)] rounded-t-[2.5rem] md:rounded-t-none md:rounded-l-[2.5rem] cart-drawer-compact ${
           isOpen 
             ? 'translate-y-0 md:translate-x-0' 
             : 'translate-y-full md:translate-y-0 md:translate-x-full'
@@ -150,7 +166,7 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
         {!isCheckingOut ? (
           <>
             {/* Cart Items List */}
-            <div className="cart-items p-6 flex flex-col gap-6 hide-scrollbar">
+            <div data-lenis-prevent className="cart-items p-6 flex flex-col gap-6 hide-scrollbar">
               {isEmpty ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4 py-16">
                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
@@ -239,7 +255,7 @@ const Cart = ({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clea
           /* Checkout Form View */
           <div className="flex-1 flex flex-col justify-between bg-gray-50/30 min-h-0 relative">
             {/* Scrollable Form Content */}
-            <div className="cart-items p-6 flex flex-col gap-6 hide-scrollbar">
+            <div data-lenis-prevent className="cart-items p-6 flex flex-col gap-6 hide-scrollbar">
               
               {/* Order Summary Section */}
               <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
